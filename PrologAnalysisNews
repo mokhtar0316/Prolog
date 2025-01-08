@@ -1,0 +1,97 @@
+% بارگذاری فایل داده‌ها
+:- consult('G:/swipl/Sample_Codes/data_analysis.pl').
+
+% نمایش تمام فکت‌ها
+show_facts :-
+    findall(fact(Value, Type), fact(Value, Type), Facts),
+    writeln('Extracted Facts:'),
+    print_list(Facts).
+
+% تحلیل نرخ تورم (Inflation Rate)
+analyze_inflation :-
+    fact(Value, percent),
+    fact(Location, gpe),
+    fact(Date, date),
+    format('The inflation rate of ~w was recorded in ~w on ~w.~n', [Value, Location, Date]).
+
+% تحلیل نرخ بهره و سایر نرخ‌ها (Interest rate, Inflation rate, Price changes, etc.)
+analyze_rate :-
+    fact(Value, percent),  % درصد را دریافت می‌کنیم
+    (   fact(Location, org), fact(Date, date)  % برای نرخ بهره و مکان‌هایی که مربوط به سازمان‌ها هستند
+    ;   fact(Location, gpe), fact(Date, date)  % برای سایر نرخ‌ها مثل تورم که به مکان‌های جغرافیایی مربوط می‌شوند
+    ),
+    format('The rate of ~w was recorded in ~w on ~w.~n', [Value, Location, Date]).
+
+% تحلیل مکان‌ها (GPE and ORG)
+analyze_location :-
+    (fact(Value, gpe); fact(Value, org)),  % بررسی هر دو نوع
+    format('The event occurred in ~w.~n', [Value]).
+
+% تحلیل درصدها
+analyze_percent :-
+    fact(Value, percent),
+    format('The percentage change recorded is ~w.~n', [Value]).
+
+% تحلیل تاریخ‌ها
+analyze_date :-
+    fact(Value, date),
+    format('The event occurred on ~w.~n', [Value]).
+
+% تحلیل تغییرات قیمت‌ها
+analyze_price_changes :-
+    fact(Value, percent),
+    fact(Location, gpe),
+    fact(Date, date),
+    format('The price change rate of ~w was recorded in ~w on ~w.~n', [Value, Location, Date]).
+
+% تحلیل نرخ بیکاری
+analyze_unemployment :-
+    fact(Value, percent),
+    fact(Location, gpe),
+    fact(Date, date),
+    format('The unemployment rate of ~w was recorded in ~w on ~w.~n', [Value, Location, Date]).
+
+% تحلیل نرخ بهره
+analyze_interest_rate :-
+    fact(Value, percent),
+    fact(Location, org),  % اینجا باید ORG را بررسی کنیم چون «USA» به عنوان سازمان شناسایی شده است
+    fact(Date, date),
+    format('The interest rate of ~w was recorded in ~w on ~w.~n', [Value, Location, Date]).
+
+% تحلیل تغییرات قیمت در بخش مسکن
+analyze_housing_price_changes :-
+    fact(Value, percent),
+    fact(Location, gpe),
+    fact(Date, date),
+    format('The housing price change rate of ~w was recorded in ~w on ~w.~n', [Value, Location, Date]).
+
+% تحلیل نرخ رشد اقتصادی
+analyze_economic_growth :-
+    fact(Value, percent),
+    fact(Location, gpe),
+    fact(Date, date),
+    format('The economic growth rate of ~w was recorded in ~w on ~w.~n', [Value, Location, Date]).
+
+% تحلیل تمام فکت‌ها
+analyze_all :-
+    analyze_inflation,
+    analyze_price_changes,
+    analyze_unemployment,
+    analyze_interest_rate,
+    analyze_location,
+    analyze_percent,
+    analyze_date.
+
+% کمک‌کننده برای نمایش فهرست
+print_list([]).
+print_list([fact(Value, Type) | T]) :-
+    format('fact(~w, ~w).~n', [Value, Type]),
+    print_list(T).
+
+% نقطه شروع برنامه
+main :-
+    writeln('Starting Prolog Analysis...'),
+    show_facts,
+    analyze_all,
+    writeln('Analysis complete.'),
+    halt.
