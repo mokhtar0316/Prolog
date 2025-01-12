@@ -1,0 +1,47 @@
+% تعریف پایگاه داده دینامیک
+:- dynamic rule/3.
+
+% قاعده استنتاج عمومی
+infer(X, Then, Context) :-
+    rule(X, Then, Context),
+    !.  % از یافتن اولین تطابق جلوگیری می‌کند
+
+% افزودن قاعده جدید
+learn_rule(If, Then, Context) :-
+    \+ rule(If, Then, Context),  % بررسی می‌کند که قاعده تکراری نباشد
+    assertz(rule(If, Then, Context)).
+
+% یادگیری از متن ورودی (پشتیبانی از شروط پیچیده)
+learn_from_text(Input) :-
+    split_string(Input, " ", "", Parts),  % جداسازی کلمات متن
+    parse_rule(Parts).
+
+% تحلیل متن و استخراج قاعده
+parse_rule([if | Rest]) :-
+    append(Conditions, [then | Actions], Rest),  % جداسازی شرط‌ها از نتیجه‌ها
+    parse_conditions(Conditions, ParsedConditions),
+    parse_actions(Actions, ParsedActions),
+    learn_rule(ParsedConditions, ParsedActions, user_input),
+    write('Rule learned: '), write(ParsedConditions), write(' -> '), write(ParsedActions), nl.
+
+% تحلیل شروط (پشتیبانی از and)
+parse_conditions(Conditions, ParsedConditions) :-
+    atomic_list_concat(Conditions, ' ', CondStr),
+    split_string(CondStr, "and", " ", ConditionList),
+    maplist(string_to_atom, ConditionList, ParsedConditions).
+
+% تحلیل نتایج (پشتیبانی از چند نتیجه)
+parse_actions(Actions, ParsedActions) :-
+    atomic_list_concat(Actions, ' ', ActStr),
+    split_string(ActStr, "and", " ", ActionList),
+    maplist(string_to_atom, ActionList, ParsedActions).
+
+% آزمایش سیستم یادگیری
+test_learning :-
+    learn_from_text("if cat is small and cat is furry then cat is cute and cat is animal"),
+    learn_from_text("if dog is loyal and dog barks then dog is animal"),
+    infer([cat is small, cat is furry], Result, _), write('Result for cat: '), write(Result), nl,
+    infer([dog is loyal, dog barks], Result2, _), write('Result for dog: '), write(Result2), nl.
+
+% اجرای برنامه
+:- test_learning.
